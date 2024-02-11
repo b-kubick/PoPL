@@ -205,5 +205,7 @@ Due: 11.02.2024
         (parse `{+ 8 y}))
   (test (subst (parse `8) 'x (parse `{* y x}))
         (parse `{* y 8}))
+  (test (subst (parse `8) 'x (parse `{max y x}))
+        (parse `{max y 8}))
   (test (subst (parse `8) 'x (parse `{double x}))
         (parse `{double 8})))
