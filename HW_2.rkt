@@ -38,6 +38,7 @@ Due: 11.02.2024
 ;; - `{define {SYMBOL SYMBOL} EXP}
 
 ;; parse ----------------------------------------
+
 #|
 Part 2:
 1. Update Data Types for 'Exp' and 'Func-Defn'
@@ -56,6 +57,7 @@ Part 2:
     [(s-exp-match? `{* ANY ANY} s)
      (multE (parse (second (s-exp->list s)))
             (parse (third (s-exp->list s))))]
+
     [(s-exp-match? `{max ANY ANY} s)
      (maxE (parse (second (s-exp->list s)))
            (parse (third (s-exp->list s))))]
@@ -63,7 +65,6 @@ Part 2:
      (appE (s-exp->symbol (first (s-exp->list s)))
            (map parse (rest (s-exp->list s))))]
     [else (error 'parse "invalid input")]))
-
 
 ;;parses a function definition
 (define (parse-fundef [s : S-Exp]) : Func-Defn
@@ -75,6 +76,7 @@ Part 2:
     [else (error 'parse-fundef "invalid input")]))
 
 #;
+
 (module+ test
   (test (parse `2)
         (numE 2))
@@ -130,6 +132,7 @@ Helper function to interpret funciton applications
                        (rest fd-args) defs))))
 
 
+
 (define (interp [a : Exp] [defs : (Listof Func-Defn)]) : Number
   (type-case Exp a
     [(numE n) n]
@@ -140,6 +143,7 @@ Helper function to interpret funciton applications
                     (interp (interp-helper args (fd-body fd) (fd-args fd) defs) defs))]
     [(maxE l r) (max (interp l defs) (interp r defs))]
     ))
+
 
 (module+ test
   (test (interp (parse `2) empty)
@@ -154,20 +158,38 @@ Helper function to interpret funciton applications
                            {+ 5 8}})
                 empty)
         19)
-  #;(test (interp (parse `{double 8})
+  (test (interp (parse `{double 8})
                 (list double-def))
         16)
-  #;(test (interp (parse `{quadruple 8})
+  (test (interp (parse `{quadruple 8})
                 (list double-def quadruple-def))
         32)
 
-  (test (interp (parse `{max 1 2}) empty)
+  (test (interp (parse `{max 1 2})
+                (list))
         2)
-
-  (test (interp (parse `{max {+ 4 5} {+ 2 3}}) empty)
+  (test (interp (parse `{max {+ 4 5} {+ 2 3}})
+                (list))
         9)
+  (test (interp (parse `{max -1 -2})
+                (list))
+        -1)
+  (test (interp (parse `{max 5 5})
+                (list))
+        5)
+  (test (interp (parse `{max {max 1 2} {max 3 4}})
+                (list))
+        4)
+  (test (interp (parse `{max {+ 1 2} {* 2 2}})
+                (list))
+        4)
+  (test (interp (parse `{max {double 2} {quadruple 1}})
+                (list double-def quadruple-def))
+        4)
+  (test (interp (parse `{max 0 -1})
+                (list))
+        0)
   )
-
 
 
 ;; get-fundef ----------------------------------------
@@ -205,6 +227,7 @@ Helper function to interpret funciton applications
                       (subst what for r))]
     [(appE s args) (appE s (map (lambda (arg) (subst what for arg)) args))]))
 
+
 (module+ test
   (test (subst (parse `8) 'x (parse `9))
         (numE 9))
@@ -220,4 +243,3 @@ Helper function to interpret funciton applications
         (parse `{max y 8}))
   (test (subst (parse `8) 'x (parse `{double x}))
         (parse `{double 8})))
-
