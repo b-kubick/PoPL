@@ -95,6 +95,6 @@
   (test (subst (parse `8) 'x (parse `{area x y}))
         (parse `{area 8 y})))
 
-(require "hw2.rkt")
+(require "HW_2.rkt")
 (module+ test
   (print-only-errors #f))
