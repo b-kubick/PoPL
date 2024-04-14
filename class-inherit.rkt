@@ -149,22 +149,24 @@ ssendE: like sendE but specifies the class name for the super method invocation
               (error 'interp "not an object")]))]
 
         ;;--------part 3 instanceOf
-        [(instanceofE obj-expr super-name)
+        
+        [(instanceofE obj-expr supers)
          (type-case Value (recur obj-expr)
            [(objV obj-class-name _)
-            (if (eq? obj-class-name super-name )
+            (if (eq? obj-class-name supers )
                 (numV 0)
-                (numV (subclass obj-class-name super-name classes)))]
+                (numV (subclass obj-class-name supers classes)))]
            [else
             (error 'interp "not an object")])]))))
 
-(define (subclass obj-name super-name classes)
+
+(define (subclass obj-name supers classes)
   (cond
-    [(eq? obj-name super-name) 1]
-    [(eq? obj-name 'Object) 0]
+    [(eq? obj-name supers) 1]
+    [(eq? supers 'Object) 0]
     [else
      (let
-         [(super-name (classC-super-name (find classes super-name)))]
+         [(super-name (classC-super-name (find classes supers)))]
        (subclass obj-name super-name classes))]
     ))
 
@@ -829,6 +831,11 @@ It converts the resulting Value to an S-exp representation (numbers ---> number 
                                          {+ {instanceof arg ColorFish}
                                             {get arg color}}]})
                      `{send {new Bear 100 5} rate-food {new ColorFish 10 3}})
-        `3))
+        `3)
+  (test/exn (interp-prog (list `{class Fish extends Object
+                            {size color}})
+                   `{instanceof {+ 1 1} Fish}) 
+      "not an object")
+  ) 
 
 
